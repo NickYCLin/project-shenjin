@@ -1,6 +1,7 @@
 #include "ShenjinCharacter.h"
 
 #include "ShenjinGameMode.h"
+#include "ShenjinAnimation.h"
 #include "ShenjinSentinel.h"
 #include "ShenjinVisuals.h"
 #include "Camera/CameraComponent.h"
@@ -58,6 +59,11 @@ AShenjinCharacter::AShenjinCharacter()
 void AShenjinCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    bSkeletalVisual = ShenjinAnimation::Load(GetMesh(), TEXT("Hero"),
+        {TEXT("Idle"), TEXT("Walk"), TEXT("Thrust"), TEXT("Dodge"), TEXT("Hit"), TEXT("Death")}, AnimationClips);
+    GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -92.0f));
+    GetMesh()->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
+    GetMesh()->SetVisibility(bSkeletalVisual);
     if (UStaticMesh* HeroMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Shenjin/Meshes/hero.hero")))
     {
         Body->SetStaticMesh(HeroMesh);
@@ -97,6 +103,21 @@ void AShenjinCharacter::BeginPlay()
         Arm->SetRelativeRotation(FRotator(0.0f, Side * -20.0f, Side * (25.0f + Row * 20.0f)));
         Arm->SetVisibility(false);
     }
+    Body->SetVisibility(!bSkeletalVisual);
+    // Bone positions define the weapon axis; no assumption about FBX bone roll.
+    bWeaponOnBone = bSkeletalVisual && GetMesh()->DoesSocketExist(TEXT("WeaponSocket"))
+        && GetMesh()->DoesSocketExist(TEXT("WeaponTip"));
+    if (bWeaponOnBone)
+    {
+        WeaponPivot->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+            TEXT("WeaponSocket"));
+        UpdateWeaponAttachment();
+    }
+    else if (bSkeletalVisual)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Shenjin: WeaponSocket/WeaponTip missing; using procedural spear pivot"));
+    }
+    UpdateAnimation(0.0f);
     UpdateOathVisual();
     if (APlayerController* PC = Cast<APlayerController>(Controller))
     {
@@ -154,6 +175,7 @@ void AShenjinCharacter::Tick(float DeltaSeconds)
     OathCooldown = FMath::Max(0.0f, OathCooldown - DeltaSeconds);
     DivineRemaining = FMath::Max(0.0f, DivineRemaining - DeltaSeconds);
     HitFlash = FMath::Max(0.0f, HitFlash - DeltaSeconds);
+    HitRemaining = FMath::Max(0.0f, HitRemaining - DeltaSeconds);
 
     if (DodgeRemaining > 0.0f)
     {
@@ -168,8 +190,8 @@ void AShenjinCharacter::Tick(float DeltaSeconds)
     {
         AttackRemaining = FMath::Max(0.0f, AttackRemaining - DeltaSeconds);
         const float Progress = 1.0f - AttackRemaining / AttackDuration;
-        WeaponPivot->SetRelativeRotation(FRotator(-20.0f - 65.0f * FMath::Sin(Progress * PI), 0.0f, 0.0f));
-        if (!bAttackResolved && Progress >= 0.35f)
+        if (!bWeaponOnBone) WeaponPivot->SetRelativeRotation(FRotator(-20.0f - 65.0f * FMath::Sin(Progress * PI), 0.0f, 0.0f));
+        if (!bAttackResolved && Progress >= AttackImpactTime / BaseAttackDuration)
         {
             bAttackResolved = true;
             ResolveAttack();
@@ -182,7 +204,9 @@ void AShenjinCharacter::Tick(float DeltaSeconds)
     {
         Arm->SetVisibility(DivineRemaining > 0.0f && IsAlive());
     }
-    Body->SetVisibility(HitFlash <= 0.0f || FMath::Fmod(HitFlash, 0.1f) < 0.05f);
+    const bool bVisible = HitFlash <= 0.0f || FMath::Fmod(HitFlash, 0.1f) < 0.05f;
+    Body->SetVisibility(!bSkeletalVisual && bVisible);
+    GetMesh()->SetVisibility(bSkeletalVisual && bVisible);
 
     // The first encounter uses a circular arena. Keep the capsule inside its edge.
     FVector Location = GetActorLocation();
@@ -202,14 +226,19 @@ void AShenjinCharacter::Tick(float DeltaSeconds)
             Mode->EndEncounter(false);
         }
     }
+    UpdateAnimation(DeltaSeconds);
+    UpdateWeaponAttachment();
 }
 
 void AShenjinCharacter::Attack()
 {
     if (!CanAct() || AttackRemaining > 0.0f || DodgeRemaining > 0.0f) return;
-    AttackDuration = DivineRemaining > 0.0f ? 0.34f : (Oath == EShenjinOath::Gale ? 0.42f : 0.55f);
+    AttackDuration = DivineRemaining > 0.0f ? 0.34f : (Oath == EShenjinOath::Gale ? 0.42f : BaseAttackDuration);
     AttackRemaining = AttackDuration;
     bAttackResolved = false;
+    HitRemaining = 0.0f;
+    if (bSkeletalVisual) ShenjinAnimation::OneShot(GetMesh(), AnimationClips, CurrentAnimation,
+        TEXT("Thrust"), AttackDuration, 0.0f, true);
     // A small facing assist makes a large static boss readable at close range.
     if (const AShenjinGameMode* Mode = Cast<AShenjinGameMode>(UGameplayStatics::GetGameMode(this)))
     {
@@ -243,10 +272,13 @@ void AShenjinCharacter::Dodge()
     if (!CanAct() || DodgeCooldown > 0.0f) return;
     DodgeDirection = GetLastMovementInputVector().GetSafeNormal2D();
     if (DodgeDirection.IsNearlyZero()) DodgeDirection = GetActorForwardVector();
-    DodgeRemaining = 0.25f;
+    DodgeRemaining = DodgeDuration;
+    HitRemaining = 0.0f;
     DodgeCooldown = Oath == EShenjinOath::Gale ? 0.7f : 1.1f;
     AttackRemaining = 0.0f;
-    WeaponPivot->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
+    if (!bWeaponOnBone) WeaponPivot->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
+    if (bSkeletalVisual) ShenjinAnimation::OneShot(GetMesh(), AnimationClips, CurrentAnimation,
+        TEXT("Dodge"), DodgeDuration, 0.0f, true);
     GetCharacterMovement()->StopMovementImmediately();
 }
 
@@ -288,6 +320,12 @@ void AShenjinCharacter::ReceiveStrike(float Damage)
     const float Multiplier = Oath == EShenjinOath::Aegis ? 0.6f : 1.0f;
     Health = FMath::Max(0.0f, Health - Damage * Multiplier);
     HitFlash = 0.3f;
+    if (AttackRemaining <= 0.0f && DodgeRemaining <= 0.0f)
+    {
+        HitRemaining = 0.35f;
+        if (bSkeletalVisual) ShenjinAnimation::OneShot(GetMesh(), AnimationClips, CurrentAnimation,
+            TEXT("Hit"), 0.35f, 0.0f, true);
+    }
     if (!IsAlive())
     {
         AttackRemaining = 0.0f;
@@ -303,4 +341,36 @@ void AShenjinCharacter::Restart()
 {
     // Allowed during a fight as well as after victory or defeat.
     UGameplayStatics::OpenLevel(this, FName(*UGameplayStatics::GetCurrentLevelName(this, true)));
+}
+
+void AShenjinCharacter::UpdateAnimation(float DeltaSeconds)
+{
+    if (!bSkeletalVisual) return;
+    if (!IsAlive())
+    {
+        DeathElapsed += DeltaSeconds;
+        ShenjinAnimation::OneShot(GetMesh(), AnimationClips, CurrentAnimation, TEXT("Death"), 1.4f, DeathElapsed);
+    }
+    else if (DodgeRemaining > 0.0f)
+        ShenjinAnimation::OneShot(GetMesh(), AnimationClips, CurrentAnimation, TEXT("Dodge"), DodgeDuration, DodgeDuration - DodgeRemaining);
+    else if (AttackRemaining > 0.0f)
+        ShenjinAnimation::OneShot(GetMesh(), AnimationClips, CurrentAnimation, TEXT("Thrust"), AttackDuration, AttackDuration - AttackRemaining);
+    else if (HitRemaining > 0.0f)
+        ShenjinAnimation::OneShot(GetMesh(), AnimationClips, CurrentAnimation, TEXT("Hit"), 0.35f, 0.35f - HitRemaining);
+    else
+    {
+        const float Speed = GetVelocity().Size2D();
+        ShenjinAnimation::Play(GetMesh(), AnimationClips, CurrentAnimation,
+            Speed > 10.0f ? TEXT("Walk") : TEXT("Idle"), true,
+            Speed > 10.0f ? FMath::Clamp(Speed / 560.0f, 0.15f, 1.8f) : 1.0f);
+    }
+}
+
+void AShenjinCharacter::UpdateWeaponAttachment()
+{
+    if (!bWeaponOnBone) return;
+    const FVector Grip = GetMesh()->GetSocketLocation(TEXT("WeaponSocket"));
+    const FVector Axis = (GetMesh()->GetSocketLocation(TEXT("WeaponTip")) - Grip).GetSafeNormal();
+    // Spear model is +Z from base, with the grip 65 cm above its base.
+    WeaponPivot->SetWorldLocationAndRotation(Grip - Axis * 65.0f, FRotationMatrix::MakeFromZ(Axis).Rotator());
 }

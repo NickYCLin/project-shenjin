@@ -1,0 +1,127 @@
+{
+  "license": "CC0-1.0",
+  "licenseUrl": "https://polyhaven.com/license",
+  "assets": [
+    {
+      "id": "old_sandstone_02",
+      "source": "https://polyhaven.com/a/old_sandstone_02",
+      "authors": {
+        "Dimitrios Savva": "All"
+      },
+      "maps": {
+        "baseColor": {
+          "path": "art/textures/old_sandstone_02/old_sandstone_02_diff_2k.jpg",
+          "size": 3149934,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/old_sandstone_02/old_sandstone_02_diff_2k.jpg",
+          "md5": "a9ffa9168384297e720cbe0bb7de9c0a",
+          "sha256": "6cb1d16af8cbcfccc72e1466e3f288f1e74a8befb1281460b8520ab754becb0a"
+        },
+        "normal": {
+          "path": "art/textures/old_sandstone_02/old_sandstone_02_nor_gl_2k.jpg",
+          "size": 4060255,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/old_sandstone_02/old_sandstone_02_nor_gl_2k.jpg",
+          "md5": "9ca8b9c1e883878828c7e7f615330ea8",
+          "sha256": "79a498bba79483ce16d2d7271bf2e120a069fd6829bc0e0f38fe8ed1ce681a75"
+        },
+        "roughness": {
+          "path": "art/textures/old_sandstone_02/old_sandstone_02_rough_2k.jpg",
+          "size": 2506137,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/old_sandstone_02/old_sandstone_02_rough_2k.jpg",
+          "md5": "4a03d9466cd3da76c22737cd5e36f4db",
+          "sha256": "45f4411cfe86daa1637c0a38510a1a27683e71f06037b84543b85a569b76d1cf"
+        }
+      }
+    },
+    {
+      "id": "monastery_stone_floor",
+      "source": "https://polyhaven.com/a/monastery_stone_floor",
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "maps": {
+        "baseColor": {
+          "path": "art/textures/monastery_stone_floor/monastery_stone_floor_diff_2k.jpg",
+          "size": 3021140,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/monastery_stone_floor/monastery_stone_floor_diff_2k.jpg",
+          "md5": "35420aa52b8257920b1d7566fb80ab4d",
+          "sha256": "aa12137fff1728bbbfe98b30480e33a34cba3b5c096575702c1d66939214e14a"
+        },
+        "normal": {
+          "path": "art/textures/monastery_stone_floor/monastery_stone_floor_nor_gl_2k.jpg",
+          "size": 4248820,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/monastery_stone_floor/monastery_stone_floor_nor_gl_2k.jpg",
+          "md5": "68fe9fe33ed384c0a0f45b57f642e0a9",
+          "sha256": "8f3e131a9d6d9c3a95c872173393830f7c1de389cd60d4878b2211058d706d2c"
+        },
+        "roughness": {
+          "path": "art/textures/monastery_stone_floor/monastery_stone_floor_rough_2k.jpg",
+          "size": 1744682,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/monastery_stone_floor/monastery_stone_floor_rough_2k.jpg",
+          "md5": "ef1df6aacd1ca6ca404ac0b927662a65",
+          "sha256": "61f87f8049b21153b6db25fdcd184c4297642ada2e31c07db03f6810c9f952c3"
+        }
+      }
+    },
+    {
+      "id": "metal_plate",
+      "source": "https://polyhaven.com/a/metal_plate",
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "maps": {
+        "baseColor": {
+          "path": "art/textures/metal_plate/metal_plate_diff_2k.jpg",
+          "size": 2670774,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/metal_plate/metal_plate_diff_2k.jpg",
+          "md5": "91b841e7e619e55588f0183a703fb644",
+          "sha256": "864c9a653acd1f5034c9bbe7f955b18cc9687a81bbdfa805e7a2319939676910"
+        },
+        "normal": {
+          "path": "art/textures/metal_plate/metal_plate_nor_gl_2k.jpg",
+          "size": 2516654,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/metal_plate/metal_plate_nor_gl_2k.jpg",
+          "md5": "797c3f3de91da0c03f44f493576e158e",
+          "sha256": "146f8c00874a584bcc4a184643e72f160da2a7568d469198e02b26c9ff93cf43"
+        },
+        "roughness": {
+          "path": "art/textures/metal_plate/metal_plate_rough_2k.jpg",
+          "size": 3045988,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/metal_plate/metal_plate_rough_2k.jpg",
+          "md5": "b2c2bfc0a5e46c1a8bdfddd236daa200",
+          "sha256": "3cdc139df4ec5b304dd986278c1fb026c67c42e6623f0ee5caa7f373d51c7bef"
+        }
+      }
+    },
+    {
+      "id": "rock_face_03",
+      "source": "https://polyhaven.com/a/rock_face_03",
+      "authors": {
+        "Dario Barresi": "Photography",
+        "Rico Cilliers": "Processing"
+      },
+      "maps": {
+        "baseColor": {
+          "path": "art/textures/rock_face_03/rock_face_03_diff_2k.jpg",
+          "size": 3814362,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_diff_2k.jpg",
+          "md5": "657add9e8a8dffaeed19bdfc58078b59",
+          "sha256": "644ee79df7ffbf5f6afc330b64dd3f33794bab8820915fe61ffe0c88ecfd7ece"
+        },
+        "normal": {
+          "path": "art/textures/rock_face_03/rock_face_03_nor_gl_2k.jpg",
+          "size": 4473242,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_nor_gl_2k.jpg",
+          "md5": "279b33e71ae6275cafa24e6597024c98",
+          "sha256": "a498cef4ba6191f6959b6d03fb835263c77271948264a289af24497ab7111dec"
+        },
+        "roughness": {
+          "path": "art/textures/rock_face_03/rock_face_03_rough_2k.jpg",
+          "size": 2601552,
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rock_face_03/rock_face_03_rough_2k.jpg",
+          "md5": "8895a8b199487fd6cfeed2fed1fb39b4",
+          "sha256": "9ca3e9e196685f702328f24d66f039b72f5330fc35cf2a2c265cfa50a7916301"
+        }
+      }
+    }
+  ]
+}

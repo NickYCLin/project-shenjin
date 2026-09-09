@@ -505,3 +505,27 @@ body.playing footer {
     left: 22px;
   }
 }
+
+.damage-number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ffe4a9;
+  font:
+    600 25px Georgia,
+    serif;
+  text-shadow: 0 2px 6px #132b2d;
+  pointer-events: none;
+  z-index: 2;
+}
+.damage-number.counter {
+  color: #a5f6dc;
+  font-size: 27px;
+}
+#hurt-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse, transparent 40%, #b43021 100%);
+  opacity: 0;
+}

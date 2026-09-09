@@ -8,17 +8,26 @@ export const RULES = Object.freeze({
   arenaRadius: 16.5,
   bossRadius: 1.7,
   playerRadius: 0.5,
-  attackRange: 3.5,
+  // Reach is measured from the player to the boss's surface.
+  attackRange: 2,
+  attackWindup: 0.2,
   attackCooldown: 0.55,
+  recoverDamageMultiplier: 1.25,
   dodgeCost: 30,
   dodgeDuration: 0.32,
   dodgeInvulnerability: 0.36,
   slamRadius: 3.4,
+  windupDuration: 1.1,
+  phaseTwoWindupDuration: 0.78,
+  slamDuration: 0.3,
+  recoveryDuration: 1.05,
+  phaseTwoRecoveryDuration: 0.72,
   aspectDuration: 6,
   maxStep: 0.05,
 });
 
 const TAU = Math.PI * 2;
+const EPSILON = 1e-9;
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const finite = (n) => (Number.isFinite(n) ? n : 0);
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
@@ -41,6 +50,11 @@ export function createGame() {
       stamina: 100,
       aspect: 100,
       attackTimer: 0,
+      attackElapsed: 0,
+      attackId: 0,
+      attackResolved: true,
+      attackCancelled: false,
+      pendingAttack: null,
       dodgeTimer: 0,
       invulnerableTimer: 0,
       aspectTimer: 0,
@@ -60,6 +74,9 @@ export function createGame() {
       targetX: 0,
       targetZ: 8,
       attackId: 0,
+      attackPhase: 1,
+      windupDuration: RULES.windupDuration,
+      recoveryDuration: RULES.recoveryDuration,
       slamRadius: RULES.slamRadius,
     },
   };
@@ -91,26 +108,87 @@ function updatePhase(state) {
 
 export function attack(state) {
   const p = state.player;
-  const b = state.boss;
-  if (!active(state) || p.attackTimer > 0 || p.dodgeTimer > 0) return false;
+  if (!active(state) || p.hp <= 0 || p.attackTimer > 0 || p.dodgeTimer > 0)
+    return false;
   start(state);
   p.attackTimer = RULES.attackCooldown;
+  p.attackElapsed = 0;
+  p.attackId += 1;
+  p.attackResolved = false;
+  p.attackCancelled = false;
+  // An oath switch or aspect activation during the thrust affects the next
+  // attack. Position, facing and the boss's recovery are evaluated on impact.
+  const isAspect = p.aspectTimer > 0;
+  p.pendingAttack = {
+    attackId: p.attackId,
+    oath: state.oath,
+    aspect: isAspect,
+    damage: (state.oath === "ember" ? 22 : 16) * (isAspect ? 1.75 : 1),
+  };
+  emit(state, "swing", p.x, p.z, {
+    attackId: p.attackId,
+    oath: state.oath,
+    aspect: isAspect,
+  });
+  return true;
+}
+
+function cancelAttack(state, reason) {
+  const p = state.player;
+  if (p.attackTimer > 0) p.attackCancelled = true;
+  if (!p.pendingAttack) return;
+  emit(state, "miss", p.x, p.z, {
+    attackId: p.pendingAttack.attackId,
+    reason,
+  });
+  p.pendingAttack = null;
+  p.attackResolved = true;
+}
+
+function resolveAttack(state) {
+  const p = state.player;
+  const b = state.boss;
+  if (!p.pendingAttack || p.attackElapsed + EPSILON < RULES.attackWindup)
+    return;
+  if (state.status !== "playing" || p.hp <= 0) {
+    cancelAttack(state, "defeat");
+    return;
+  }
+  const pending = p.pendingAttack;
+  p.pendingAttack = null;
+  p.attackResolved = true;
   const dx = b.x - p.x;
   const dz = b.z - p.z;
   const d = Math.hypot(dx, dz);
   const facing =
     d === 0 ? 1 : (dx * Math.sin(p.yaw) + dz * Math.cos(p.yaw)) / d;
-  // Reach is measured to the boss's surface, with a 120-degree forward cone.
-  if (d > RULES.attackRange + RULES.bossRadius || facing < 0.5 || b.hp <= 0)
-    return true;
-  const isAspect = p.aspectTimer > 0;
+  // The 120-degree forward cone and short reach must still overlap at impact.
+  if (
+    d > RULES.attackRange + RULES.bossRadius + EPSILON ||
+    facing < 0.5 - EPSILON ||
+    b.hp <= 0
+  ) {
+    emit(state, "miss", p.x, p.z, {
+      attackId: pending.attackId,
+      reason: "outside-reach",
+    });
+    return;
+  }
+  const counter = b.state === "recover";
   const damage = Math.round(
-    (state.oath === "ember" ? 22 : 16) * (isAspect ? 1.75 : 1),
+    pending.damage * (counter ? RULES.recoverDamageMultiplier : 1),
   );
   b.hp = Math.max(0, b.hp - damage);
-  if (!isAspect) p.aspect = Math.min(100, p.aspect + 8);
-  if (state.oath === "tide") p.hp = Math.min(p.maxHp, p.hp + 4);
-  emit(state, "hit", b.x, b.z, { damage, aspect: isAspect, oath: state.oath });
+  if (!pending.aspect && p.aspectTimer <= 0)
+    p.aspect = Math.min(100, p.aspect + 8);
+  if (pending.oath === "tide") p.hp = Math.min(p.maxHp, p.hp + 4);
+  emit(state, "hit", b.x, b.z, {
+    damage,
+    aspect: pending.aspect,
+    oath: pending.oath,
+    attackId: pending.attackId,
+    counter,
+  });
   updatePhase(state);
   if (b.hp === 0) {
     b.state = "dead";
@@ -119,7 +197,6 @@ export function attack(state) {
     state.kills += 1;
     emit(state, "win", b.x, b.z);
   }
-  return true;
 }
 
 export function dodge(state, dx = 0, dz = 0) {
@@ -138,6 +215,8 @@ export function dodge(state, dx = 0, dz = 0) {
     p.invulnerableTimer,
     RULES.dodgeInvulnerability,
   );
+  // Keep the original cooldown, so cancelling does not enable attack spam.
+  cancelAttack(state, "dodge");
   emit(state, "dodge", p.x, p.z);
   return true;
 }
@@ -190,10 +269,10 @@ function separateActors(state) {
 function slam(state) {
   const p = state.player;
   const b = state.boss;
-  // Damage is resolved once, at the windup -> slam transition.
+  // Damage is resolved once when the 0.30 s Slam clip reaches contact.
   emit(state, "slam", b.targetX, b.targetZ, {
     radius: b.slamRadius,
-    phase: b.phase,
+    phase: b.attackPhase,
   });
   if (
     Math.hypot(p.x - b.targetX, p.z - b.targetZ) >
@@ -201,12 +280,13 @@ function slam(state) {
     p.invulnerableTimer > 0
   )
     return;
-  const damage = b.phase === 2 ? 32 : 24;
+  const damage = b.attackPhase === 2 ? 32 : 24;
   p.hp = Math.max(0, p.hp - damage);
   p.invulnerableTimer = 0.75;
   emit(state, "hurt", p.x, p.z, { damage });
   if (p.hp === 0) {
     state.status = "lost";
+    cancelAttack(state, "defeat");
     emit(state, "lose", p.x, p.z);
   }
 }
@@ -217,12 +297,22 @@ function stepBoss(state, dt) {
   updatePhase(state);
   b.yaw = Math.atan2(p.x - b.x, p.z - b.z);
   b.timer = Math.max(0, b.timer - dt);
+  if (b.timer < EPSILON) b.timer = 0;
   if (b.state === "idle" && b.timer <= 0) b.state = "chase";
   if (b.state === "chase") {
     const d = distance(p, b);
     if (d <= 4.7) {
       b.state = "windup";
-      b.timer = b.phase === 2 ? 0.78 : 1.1;
+      b.attackPhase = b.phase;
+      b.windupDuration =
+        b.attackPhase === 2
+          ? RULES.phaseTwoWindupDuration
+          : RULES.windupDuration;
+      b.recoveryDuration =
+        b.attackPhase === 2
+          ? RULES.phaseTwoRecoveryDuration
+          : RULES.recoveryDuration;
+      b.timer = b.windupDuration;
       b.targetX = p.x;
       b.targetZ = p.z;
       b.attackId += 1;
@@ -234,11 +324,15 @@ function stepBoss(state, dt) {
     }
   } else if (b.state === "windup" && b.timer <= 0) {
     b.state = "slam";
-    b.timer = 0.3;
-    slam(state);
+    b.timer = RULES.slamDuration;
   } else if (b.state === "slam" && b.timer <= 0) {
-    b.state = "recover";
-    b.timer = b.phase === 2 ? 0.72 : 1.05;
+    slam(state);
+    // A lethal strike keeps the final contact pose. Terminal states are not
+    // stepped again, so this impact cannot repeat after defeat.
+    if (state.status === "playing") {
+      b.state = "recover";
+      b.timer = b.recoveryDuration;
+    }
   } else if (b.state === "recover" && b.timer <= 0) {
     b.state = "chase";
   }
@@ -260,7 +354,11 @@ export function step(state, input = {}, dt = 0) {
 
   const p = state.player;
   state.time += dt;
+  if (p.attackTimer > 0) {
+    p.attackElapsed = Math.min(RULES.attackCooldown, p.attackElapsed + dt);
+  }
   p.attackTimer = Math.max(0, p.attackTimer - dt);
+  if (p.attackTimer < EPSILON) p.attackTimer = 0;
   p.oathCooldown = Math.max(0, p.oathCooldown - dt);
 
   if (p.aspectTimer > 0) {
@@ -283,6 +381,7 @@ export function step(state, input = {}, dt = 0) {
   separateActors(state);
   stepBoss(state, dt);
   separateActors(state);
+  resolveAttack(state);
   // Resolve attacks using the protection available at the start of this frame.
   p.invulnerableTimer = Math.max(0, p.invulnerableTimer - dt);
   return state;

@@ -19,5 +19,7 @@ jobs:
       - run: npm run validate:assets
       - run: npm run build
       - name: Validate Python syntax without running Blender or Unreal
-        run: python3 -m compileall -q tools/blender unreal/Scripts
+        run: python3 -m compileall -q tools unreal/Scripts
+      - name: Check native source contracts (does not compile UE)
+        run: python3 unreal/Scripts/validate_source.py
 # This workflow does not compile or test Unreal Engine. See unreal/README.md.

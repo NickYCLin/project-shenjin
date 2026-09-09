@@ -4,6 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "ShenjinSentinel.generated.h"
 
+class UAnimSequence;
+class USkeletalMeshComponent;
 class UCapsuleComponent;
 class USceneComponent;
 class UStaticMeshComponent;
@@ -30,6 +32,8 @@ protected:
 private:
     void StartTelegraph();
     void Slam();
+    void ResolveSlam();
+    void UpdateAnimation(float DeltaSeconds, float MovementSpeed);
     float GetStrikeRadius() const { return bChargedAttack ? 570.0f : 440.0f; }
 
     UPROPERTY(VisibleAnywhere)
@@ -40,6 +44,18 @@ private:
     TObjectPtr<UStaticMeshComponent> Body;
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UStaticMeshComponent> Telegraph;
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<USkeletalMeshComponent> SkeletalBody;
+    UPROPERTY()
+    TMap<FName, TObjectPtr<UAnimSequence>> AnimationClips;
+
+    FName CurrentAnimation;
+    bool bSkeletalVisual = false;
+    bool bSlamResolved = false;
+    float DeathElapsed = 0.0f;
+    float HitRemaining = 0.0f;
+    static constexpr float SlamDuration = 0.30f;
+    static constexpr float SlamImpactTime = 0.30f;
 
     ESentinelState State = ESentinelState::Approach;
     float Health = 1200.0f;

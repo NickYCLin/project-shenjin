@@ -19,13 +19,14 @@
         aria-label="失落神殿 3D 戰鬥場景"
       ></canvas>
       <div class="vignette"></div>
+      <div id="hurt-flash" aria-hidden="true"></div>
       <header class="brand">
         <span class="sigil">◇</span>
         <div><strong>神燼</strong><small>三 誓 之 戰</small></div>
       </header>
       <div class="chapter">
         <span>CHAPTER 00</span><strong>失落神殿</strong
-        ><small>戰鬥試作 · v0.1</small>
+        ><small>戰鬥試作 · v0.2</small>
       </div>
       <section id="intro" class="panel intro" aria-label="開始遊戲">
         <span class="eyebrow">THE FIRST OATH</span>
@@ -80,6 +81,7 @@
         <div id="combat-message" role="status"></div>
       </section>
       <nav class="utilities" aria-label="遊戲設定">
+        <button id="motion" aria-pressed="true">震動：開</button>
         <button id="sound" aria-pressed="false">音效：關</button
         ><button id="pause" hidden>暫停</button>
       </nav>

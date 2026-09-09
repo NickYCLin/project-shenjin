@@ -1,0 +1,32 @@
+{
+  "stone": {
+    "baseColor": "art/textures/old_sandstone_02/old_sandstone_02_diff_2k.jpg",
+    "normal": "art/textures/old_sandstone_02/old_sandstone_02_nor_gl_2k.jpg",
+    "roughness": "art/textures/old_sandstone_02/old_sandstone_02_rough_2k.jpg"
+  },
+  "lightstone": {
+    "baseColor": "art/textures/old_sandstone_02/old_sandstone_02_diff_2k.jpg",
+    "normal": "art/textures/old_sandstone_02/old_sandstone_02_nor_gl_2k.jpg",
+    "roughness": "art/textures/old_sandstone_02/old_sandstone_02_rough_2k.jpg"
+  },
+  "floor": {
+    "baseColor": "art/textures/monastery_stone_floor/monastery_stone_floor_diff_2k.jpg",
+    "normal": "art/textures/monastery_stone_floor/monastery_stone_floor_nor_gl_2k.jpg",
+    "roughness": "art/textures/monastery_stone_floor/monastery_stone_floor_rough_2k.jpg"
+  },
+  "gold": {
+    "baseColor": "art/textures/metal_plate/metal_plate_diff_2k.jpg",
+    "normal": "art/textures/metal_plate/metal_plate_nor_gl_2k.jpg",
+    "roughness": "art/textures/metal_plate/metal_plate_rough_2k.jpg"
+  },
+  "bronze": {
+    "baseColor": "art/textures/metal_plate/metal_plate_diff_2k.jpg",
+    "normal": "art/textures/metal_plate/metal_plate_nor_gl_2k.jpg",
+    "roughness": "art/textures/metal_plate/metal_plate_rough_2k.jpg"
+  },
+  "rock": {
+    "baseColor": "art/textures/rock_face_03/rock_face_03_diff_2k.jpg",
+    "normal": "art/textures/rock_face_03/rock_face_03_nor_gl_2k.jpg",
+    "roughness": "art/textures/rock_face_03/rock_face_03_rough_2k.jpg"
+  }
+}

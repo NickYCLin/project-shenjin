@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "ShenjinCharacter.generated.h"
 
+class UAnimSequence;
 class UCameraComponent;
 class USpringArmComponent;
 class USceneComponent;
@@ -53,6 +54,8 @@ private:
     void Restart();
     bool CanAct() const;
     void UpdateOathVisual();
+    void UpdateAnimation(float DeltaSeconds);
+    void UpdateWeaponAttachment();
 
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<USpringArmComponent> CameraBoom;
@@ -67,6 +70,18 @@ private:
     UPROPERTY()
     TArray<TObjectPtr<UStaticMeshComponent>> DivineArms;
 
+    UPROPERTY()
+    TMap<FName, TObjectPtr<UAnimSequence>> AnimationClips;
+
+    FName CurrentAnimation;
+    bool bSkeletalVisual = false;
+    bool bWeaponOnBone = false;
+    float DeathElapsed = 0.0f;
+    float HitRemaining = 0.0f;
+    static constexpr float BaseAttackDuration = 0.55f;
+    static constexpr float AttackImpactTime = 0.20f;
+    static constexpr float DodgeDuration = 0.32f;
+
     EShenjinOath Oath = EShenjinOath::Ember;
     float Health = 100.0f;
     float DivineCharge = 40.0f;
@@ -75,7 +90,7 @@ private:
     float DodgeCooldown = 0.0f;
     float OathCooldown = 0.0f;
     float AttackRemaining = 0.0f;
-    float AttackDuration = 0.5f;
+    float AttackDuration = BaseAttackDuration;
     float HitFlash = 0.0f;
     bool bAttackResolved = false;
     FVector DodgeDirection = FVector::ForwardVector;
