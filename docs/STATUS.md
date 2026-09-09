@@ -22,7 +22,7 @@ Browser 與 UE 是各自實作的實驗；Browser 有兩種神誓，UE 有三種
 - UE 來源契約檢查會輸出 JSON，涵蓋 Python 語法、命名、資產路徑與 cook 設定；**C++ 編譯、UHT、Editor 匯入、PIE、封裝皆尚未執行**。
 
 - 7 份 GLB 通過 Khronos Validator，全部 0 errors / 0 warnings；格式檢查與 production build 通過。
-- Chrome 實際載入新版模型與材質，檢查開始、自然敗北、重試、神相、鍵盤操作與暫停；主控台未見 warning / error。實際畫面見[截圖](browser-prototype-v2.png)。完整勝利流程目前由規則模擬測試覆蓋，尚未以人工操作完成。
+- Chrome 實際載入新版模型與材質，檢查開始、自然敗北、重試、神相、鍵盤操作與暫停；主控台未見 warning / error。實際畫面見[截圖](browser-prototype-v2.jpg)。完整勝利流程目前由規則模擬測試覆蓋，尚未以人工操作完成。
 - 尚未量測完整渲染 FPS、GPU 記憶體或各硬體效能；39 項測試通過不代表這些效能項目通過。GitHub CI 狀態以 repository 的 workflow badge 與該 commit 的 Actions 為準。
 
 ## 下一個里程碑

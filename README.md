@@ -27,7 +27,7 @@ v0.2 已加入有骨架的原創角色、13 段動作、分層盔甲、雕刻神
 仍缺少精雕角色、自然布料／頭髮動態、完整環境美術與配音，距離上方目標還有明顯差距。
 UE5 是主要開發方向；瀏覽器試作是獨立的手感實驗，不代表 UE5 畫面、效能或程式驗證。
 
-![v0.2 瀏覽器原型實際遊戲畫面](docs/browser-prototype-v2.png)
+![v0.2 瀏覽器原型實際遊戲畫面](docs/browser-prototype-v2.jpg)
 
 *上圖是 v0.2 瀏覽器原型實際截圖。另可查看 [Blender 場景渲染](art/renders/temple-v2.png)
 與[角色渲染](art/renders/animation-preview.png)，均為 repository 中模型的實際輸出。*
