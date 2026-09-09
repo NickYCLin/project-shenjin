@@ -1,0 +1,103 @@
+{
+  "generator": "tools/blender/build_assets.py",
+  "blender_version": "4.0.2",
+  "units": "meters",
+  "source_up": "+Z",
+  "source_character_forward": "-Y",
+  "gltf_up": "+Y",
+  "gltf_character_forward": "+Z",
+  "assets": {
+    "temple": {
+      "triangles": 54532,
+      "material_batches": 11,
+      "source_bounds_m": {
+        "min": [
+          -68.74298858642578,
+          -31.5,
+          -28.87626838684082
+        ],
+        "max": [
+          70.10322570800781,
+          88.6015625,
+          28.700000762939453
+        ]
+      },
+      "glb_bytes": 3309608,
+      "fbx_bytes": 1060524,
+      "gltf_forward_marker_translation": [
+        0,
+        0,
+        1
+      ]
+    },
+    "hero": {
+      "triangles": 10191,
+      "material_batches": 7,
+      "source_bounds_m": {
+        "min": [
+          -0.6522024273872375,
+          -0.3019455671310425,
+          0.0
+        ],
+        "max": [
+          0.6522024869918823,
+          0.31201040744781494,
+          1.7999998331069946
+        ]
+      },
+      "glb_bytes": 542804,
+      "fbx_bytes": 261180,
+      "gltf_forward_marker_translation": [
+        0,
+        0,
+        1
+      ]
+    },
+    "sentinel": {
+      "triangles": 20095,
+      "material_batches": 7,
+      "source_bounds_m": {
+        "min": [
+          -2.5500001907348633,
+          -0.9183673858642578,
+          0.0
+        ],
+        "max": [
+          2.5500001907348633,
+          0.9489796757698059,
+          6.000000476837158
+        ]
+      },
+      "glb_bytes": 1083068,
+      "fbx_bytes": 464732,
+      "gltf_forward_marker_translation": [
+        0,
+        0,
+        1
+      ]
+    },
+    "spear": {
+      "triangles": 2516,
+      "material_batches": 3,
+      "source_bounds_m": {
+        "min": [
+          -0.14577029645442963,
+          -0.03550000116229057,
+          0.0
+        ],
+        "max": [
+          0.14577029645442963,
+          0.03099999949336052,
+          2.4000000953674316
+        ]
+      },
+      "glb_bytes": 174092,
+      "fbx_bytes": 74092,
+      "gltf_forward_marker_translation": [
+        0,
+        0,
+        1
+      ]
+    }
+  }
+}

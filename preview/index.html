@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#142629" />
+    <meta
+      name="description"
+      content="神燼：三誓之戰 — 失落神殿，可操作的早期戰鬥試作。"
+    />
+    <link rel="icon" href="data:," />
+    <title>神燼：三誓之戰 · 失落神殿</title>
+  </head>
+  <body>
+    <main id="app">
+      <canvas
+        id="world"
+        tabindex="0"
+        aria-label="失落神殿 3D 戰鬥場景"
+      ></canvas>
+      <div class="vignette"></div>
+      <header class="brand">
+        <span class="sigil">◇</span>
+        <div><strong>神燼</strong><small>三 誓 之 戰</small></div>
+      </header>
+      <div class="chapter">
+        <span>CHAPTER 00</span><strong>失落神殿</strong
+        ><small>戰鬥試作 · v0.1</small>
+      </div>
+      <section id="intro" class="panel intro" aria-label="開始遊戲">
+        <span class="eyebrow">THE FIRST OATH</span>
+        <h1>諸神已逝。<br />你的誓言，<em>才正要開始。</em></h1>
+        <p>
+          踏入神明遺骸上的聖域，喚醒沉眠守衛。<br />以長槍破陣，以神相迎戰。
+        </p>
+        <button id="start" class="primary" disabled>正在開啟神殿…</button>
+        <div id="load-status" role="status">載入 Blender 場景與角色</div>
+        <div class="intro-controls">
+          <span><kbd>W A S D</kbd> 移動</span><span><kbd>J</kbd> 攻擊</span
+          ><span><kbd>SPACE</kbd> 閃避</span>
+        </div>
+        <small class="disclosure"
+          >早期可玩原型 · 原創 Blender 模型 · 尚非最終美術品質</small
+        >
+      </section>
+      <section id="hud" hidden aria-label="戰鬥狀態">
+        <div class="vitals">
+          <div class="vitals-head">
+            <span id="oath-name">燼誓 · 破陣</span
+            ><span id="hp-text">100 / 100</span>
+          </div>
+          <div class="bar hp"><i id="hp-bar"></i></div>
+          <div class="bar stamina"><i id="stamina-bar"></i></div>
+          <div class="aspect-label">
+            <span>神相</span><span id="aspect-text">100%</span>
+          </div>
+          <div class="bar aspect"><i id="aspect-bar"></i></div>
+        </div>
+        <div class="boss-vitals">
+          <small id="boss-phase">神殿鎮守 · 第一相</small
+          ><strong>無聲的誓衛</strong>
+          <div class="bar boss"><i id="boss-bar"></i></div>
+          <span id="boss-action">靠近守衛，尋找破綻</span>
+        </div>
+        <div class="objective">
+          <span>試煉目標</span><strong>擊敗神殿守衛</strong
+          ><small>離開紅色圓陣，趁收招時反擊。</small>
+        </div>
+        <div class="actions">
+          <button id="attack">
+            <b>╱</b><span>長槍突刺</span><kbd>J / 左鍵</kbd></button
+          ><button id="dodge">
+            <b>彡</b><span>疾步閃避</span><kbd>SPACE</kbd></button
+          ><button id="aspect"><b>✧</b><span>神相降臨</span><kbd>Q</kbd></button
+          ><button id="oath"><b>◇</b><span>切換神誓</span><kbd>E</kbd></button>
+        </div>
+        <div class="movement-note">
+          <kbd>WASD</kbd> 移動　·　滑鼠右鍵拖曳視角　·　<kbd>ESC</kbd> 暫停
+        </div>
+        <div id="combat-message" role="status"></div>
+      </section>
+      <nav class="utilities" aria-label="遊戲設定">
+        <button id="sound" aria-pressed="false">音效：關</button
+        ><button id="pause" hidden>暫停</button>
+      </nav>
+      <section
+        id="pause-panel"
+        class="panel modal"
+        hidden
+        aria-label="暫停選單"
+      >
+        <span class="eyebrow">TAKE A BREATH</span>
+        <h2>誓言，稍候。</h2>
+        <p>
+          WASD 移動 · J／左鍵攻擊 · 空白鍵閃避<br />Q 神相 · E 切換燼誓／潮誓 ·
+          右鍵拖曳視角
+        </p>
+        <button id="resume" class="primary">繼續試煉</button
+        ><button id="restart-pause" class="secondary">重新挑戰</button>
+      </section>
+      <section id="result" class="panel modal" hidden aria-label="試煉結果">
+        <span id="result-kicker" class="eyebrow">OATH FULFILLED</span>
+        <h2 id="result-title">誓衛已沉眠</h2>
+        <p id="result-copy"></p>
+        <button id="restart" class="primary">再次挑戰</button
+        ><small>戰鬥試作 · 進度不會存檔</small>
+      </section>
+      <footer>PROJECT SHENJIN <span>·</span> LOST TEMPLE STUDY</footer>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

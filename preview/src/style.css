@@ -1,0 +1,507 @@
+:root {
+  font-family:
+    Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  color: #f0e8d6;
+  background: #172b31;
+  font-synthesis: none;
+  font-weight: 400;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+button:focus-visible,
+canvas:focus-visible {
+  outline: 2px solid #f9d49b;
+  outline-offset: 5px;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+[hidden] {
+  display: none !important;
+}
+#app,
+#world {
+  width: 100vw;
+  height: 100dvh;
+}
+#world {
+  position: absolute;
+  inset: 0;
+  display: block;
+  outline: none;
+}
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      0deg,
+      #08171caf,
+      transparent 22%,
+      transparent 82%,
+      #0a1c2570
+    ),
+    linear-gradient(90deg, #07191d60, transparent 50%);
+}
+.brand {
+  position: absolute;
+  left: 42px;
+  top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: none;
+}
+.sigil {
+  font-size: 48px;
+  color: #d3b77e;
+}
+.brand strong {
+  font-family: serif;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+}
+.brand small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: #d7c5a7;
+}
+.chapter {
+  position: absolute;
+  right: 40px;
+  top: 35px;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  text-shadow: 0 1px 8px #0a2026;
+}
+.chapter span,
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.27em;
+  color: #d9bc85;
+}
+.chapter strong {
+  font-family: serif;
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  font-weight: 400;
+}
+.chapter small {
+  font-size: 10px;
+  color: #d4dcd6;
+  letter-spacing: 0.1em;
+}
+.panel {
+  background: linear-gradient(90deg, #0c1d25e8, #0c1d2588);
+  border-left: 1px solid #bea67970;
+}
+.intro {
+  position: absolute;
+  left: 5%;
+  top: 24%;
+  width: 430px;
+  padding: 26px 35px 27px;
+  animation: arrive 0.8s ease;
+}
+.intro h1 {
+  font-family: serif;
+  line-height: 1.6;
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  margin: 20px 0;
+}
+.intro em {
+  display: block;
+  font-style: normal;
+  color: #e6c698;
+}
+.intro p,
+.modal p {
+  font-size: 13px;
+  line-height: 2;
+  color: #c1cacc;
+}
+.primary {
+  display: block;
+  width: 100%;
+  background: #cfb27b;
+  color: #17272c;
+  border: 1px solid #e3cc99;
+  padding: 15px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  margin: 22px 0 12px;
+  transition: background 0.2s;
+}
+.primary:hover {
+  background: #ead3a2;
+}
+.secondary {
+  border: 1px solid #ac9560;
+  background: transparent;
+  padding: 12px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.intro-controls {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  flex-wrap: wrap;
+  color: #a8b9bc;
+  margin: 24px 0 13px;
+}
+.intro-controls span {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+kbd {
+  font: 9px monospace;
+  letter-spacing: 0.03em;
+  border: 1px solid #e8d9b94d;
+  padding: 3px 5px;
+  border-radius: 2px;
+  color: #e0d6bf;
+}
+.disclosure {
+  font-size: 9px;
+  color: #a6b3b5;
+  letter-spacing: 0.02em;
+}
+#load-status {
+  font-size: 11px;
+  color: #b5c5c8;
+  min-height: 18px;
+}
+.vitals {
+  position: absolute;
+  top: 120px;
+  left: 42px;
+  width: 235px;
+  text-shadow: 0 1px 3px #102226;
+}
+.vitals-head,
+.aspect-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin: 8px 0;
+}
+.aspect-label {
+  color: #ccb580;
+  font-size: 10px;
+}
+.bar {
+  height: 7px;
+  background: #08191bd4;
+  border: 1px solid #ab97715c;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transition: width 0.15s;
+  background: #a95742;
+}
+.stamina {
+  margin-top: 6px;
+  height: 4px;
+}
+.stamina i {
+  background: #66afa1;
+}
+.aspect {
+  height: 3px;
+}
+.aspect i {
+  background: #e5c378;
+}
+.boss-vitals {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(34%, 520px);
+  text-align: center;
+  text-shadow: 0 2px 5px #102127;
+}
+.boss-vitals small {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: #e1c69b;
+}
+.boss-vitals strong {
+  display: block;
+  font-family: serif;
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0.17em;
+  margin: 9px 0 12px;
+}
+.boss {
+  height: 5px;
+}
+.boss i {
+  background: linear-gradient(90deg, #bf8862, #dab986);
+}
+#boss-action {
+  display: block;
+  margin-top: 9px;
+  font-size: 11px;
+  color: #e6d4b1;
+  letter-spacing: 0.08em;
+}
+.objective {
+  position: absolute;
+  top: 48%;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border-right: 2px solid #c6a167;
+  padding-right: 16px;
+  text-align: right;
+  text-shadow: 0 2px 6px #14282d;
+}
+.objective span {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: #cbb581;
+}
+.objective strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.objective small {
+  font-size: 10px;
+  color: #c9d0c8;
+}
+.actions {
+  position: absolute;
+  right: 40px;
+  bottom: 66px;
+  display: flex;
+  gap: 12px;
+}
+.actions button {
+  border: 1px solid #b9a37590;
+  background: #14272dd9;
+  backdrop-filter: blur(8px);
+  padding: 10px 9px;
+  min-width: 77px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 9px;
+  transition: background 0.15s;
+}
+.actions button:hover {
+  background: #365457;
+}
+.actions button b {
+  font-size: 27px;
+  font-weight: 300;
+  color: #ecd49e;
+}
+.actions button span {
+  font-size: 10px;
+  color: #ede0c3;
+}
+.actions button.active {
+  border-color: #f5ce82;
+  box-shadow: 0 0 22px #e4b76255;
+}
+.movement-note {
+  position: absolute;
+  bottom: 36px;
+  left: 42px;
+  font-size: 10px;
+  color: #bdcac7;
+  letter-spacing: 0.03em;
+}
+.utilities {
+  position: absolute;
+  right: 40px;
+  bottom: 26px;
+  display: flex;
+  gap: 15px;
+}
+.utilities button {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #e4d7ba;
+}
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(440px, 90vw);
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 0 0 100vmax #06171a7a;
+  backdrop-filter: blur(12px);
+}
+.modal h2 {
+  font-family: serif;
+  font-weight: 400;
+  font-size: 32px;
+  letter-spacing: 0.1em;
+}
+.modal small {
+  font-size: 10px;
+  color: #a7b8b9;
+}
+.modal .primary {
+  margin-top: 28px;
+}
+#combat-message {
+  position: absolute;
+  left: 50%;
+  bottom: 24%;
+  transform: translateX(-50%);
+  font-family: serif;
+  font-size: 24px;
+  color: #f5d99f;
+  text-shadow: 0 2px 12px #132c30;
+  letter-spacing: 0.18em;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+footer {
+  position: absolute;
+  bottom: 17px;
+  left: 42px;
+  font-size: 8px;
+  color: #96afad;
+  letter-spacing: 0.2em;
+  pointer-events: none;
+}
+footer span {
+  margin: 0 8px;
+}
+body.playing footer {
+  display: none;
+}
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-height: 720px) {
+  .intro {
+    top: 19%;
+    padding: 20px 28px;
+  }
+  .intro h1 {
+    font-size: 30px;
+    line-height: 1.45;
+    margin: 12px 0;
+  }
+  .intro-controls {
+    margin-top: 15px;
+  }
+  .primary {
+    margin-top: 15px;
+  }
+  .brand {
+    top: 20px;
+  }
+  .chapter {
+    top: 22px;
+  }
+  .vitals {
+    top: 98px;
+  }
+}
+@media (max-width: 760px) {
+  .brand {
+    left: 22px;
+  }
+  .chapter {
+    right: 22px;
+  }
+  .intro {
+    left: 22px;
+    width: min(410px, calc(100vw - 44px));
+    top: 22%;
+    padding: 22px;
+  }
+  .intro h1 {
+    font-size: 29px;
+  }
+  .vitals {
+    left: 22px;
+    top: 105px;
+    width: 165px;
+  }
+  .boss-vitals {
+    top: 36px;
+    left: 52%;
+    width: 34%;
+  }
+  .boss-vitals strong {
+    font-size: 17px;
+  }
+  .boss-vitals small {
+    font-size: 8px;
+  }
+  .chapter strong {
+    font-size: 16px;
+  }
+  .objective {
+    display: none;
+  }
+  .actions {
+    right: 22px;
+    bottom: 66px;
+    gap: 6px;
+  }
+  .actions button {
+    min-width: 63px;
+    padding: 8px 5px;
+  }
+  .actions button span {
+    font-size: 9px;
+  }
+  .movement-note {
+    left: 22px;
+    bottom: 42px;
+    font-size: 8px;
+  }
+  .utilities {
+    right: 22px;
+    bottom: 16px;
+  }
+  footer {
+    left: 22px;
+  }
+}

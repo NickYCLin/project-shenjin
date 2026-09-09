@@ -1,0 +1,27 @@
+{
+  "name": "project-shenjin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shenjin: Three Oaths — Blender assets, UE5 source and browser combat study",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node tools/sync-preview-assets.mjs && vite --config preview/vite.config.js --host 127.0.0.1",
+    "build": "node tools/sync-preview-assets.mjs && vite build --config preview/vite.config.js",
+    "preview": "vite preview --config preview/vite.config.js --host 127.0.0.1",
+    "test": "node --test preview/test/*.test.js",
+    "validate:assets": "node tools/validate-assets.mjs",
+    "format:check": "prettier --check preview tools/*.mjs package.json"
+  },
+  "dependencies": {
+    "three": "0.186.0"
+  },
+  "devDependencies": {
+    "gltf-validator": "2.0.0-dev.3.10",
+    "prettier": "3.6.2",
+    "vite": "8.2.2"
+  }
+}
