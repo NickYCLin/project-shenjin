@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>多人主神戰｜神燼</title>
+    <link rel="stylesheet" href="./src/war.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <a href="./">返回行旅</a>
+        <h1>多人主神戰</h1>
+      </header>
+      <form id="lobby">
+        <p>與友人進入同一戰場，分屬不同信仰，爭奪中央的日輪祭壇。</p>
+        <label
+          >戰場代號
+          <input
+            id="room"
+            maxlength="12"
+            value="SUN"
+            pattern="[A-Za-z0-9]{1,12}"
+            required
+            autocomplete="off"
+            title="1 至 12 個英文字母或數字"
+        /></label>
+        <label
+          >信仰
+          <select id="faith">
+            <option value="bloom">生蓮</option>
+            <option value="ward">持輪</option>
+            <option value="pyre">焚日</option>
+          </select></label
+        >
+        <button id="join">進入戰場</button>
+      </form>
+      <p id="status" role="status">
+        相同代號的玩家會相遇。至少兩方到齊後開戰。
+      </p>
+      <section id="arena" hidden>
+        <div class="strip">
+          <strong id="code"></strong><span id="roster"></span
+          ><button id="invite">複製邀請連結</button
+          ><button id="leave">離場</button>
+        </div>
+        <div id="scores" aria-label="各方積分"></div>
+        <canvas
+          id="map"
+          width="960"
+          height="600"
+          tabindex="0"
+          aria-label="日輪祭壇戰場。點地移動，或使用方向鍵，空白鍵出槍。"
+        ></canvas>
+        <div class="strip">
+          <span>點地或方向鍵移動，空白鍵出槍。獨佔祭壇累積 30 秒獲勝。</span
+          ><button id="attack">出槍</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./src/war-client.js"></script>
+  </body>
+</html>

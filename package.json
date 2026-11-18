@@ -14,10 +14,13 @@
     "preview": "vite preview --config preview/vite.config.js --host 127.0.0.1",
     "test": "node --test preview/test/*.test.js",
     "validate:assets": "node tools/validate-assets.mjs",
-    "format:check": "prettier --check preview tools/*.mjs package.json"
+    "format:check": "prettier --check preview tools/*.mjs package.json",
+    "start": "node tools/serve.mjs"
   },
   "dependencies": {
-    "three": "0.186.0"
+    "sirv": "^3.0.2",
+    "three": "0.186.0",
+    "ws": "^8.23.0"
   },
   "devDependencies": {
     "gltf-validator": "2.0.0-dev.3.10",

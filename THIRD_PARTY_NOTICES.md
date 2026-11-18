@@ -11,6 +11,8 @@ Audio in the browser study is synthesized at runtime.
 | Component | License / source | How used |
 | --- | --- | --- |
 | Three.js | MIT — https://github.com/mrdoob/three.js/blob/dev/LICENSE | Browser renderer and official example modules, installed through npm |
+| ws | MIT — https://github.com/websockets/ws | Multiplayer WebSocket transport |
+| sirv | MIT — https://github.com/lukeed/sirv | Serving the built game from the multiplayer host |
 | Vite | MIT — https://github.com/vitejs/vite/blob/main/LICENSE | Development/build tooling, installed through npm |
 | Prettier | MIT — https://github.com/prettier/prettier/blob/main/LICENSE | Development-time source formatting, installed through npm |
 | Khronos glTF Validator | Apache-2.0 — https://github.com/KhronosGroup/glTF-Validator | Development-time asset validation, installed through npm |

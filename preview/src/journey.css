@@ -144,3 +144,13 @@ button:focus-visible {
 button:active:not(:disabled) {
   filter: brightness(0.92);
 }
+.war-link {
+  display: block;
+  width: fit-content;
+  color: var(--gold);
+  margin: 8px 0 12px;
+  text-underline-offset: 4px;
+}
+.war-link:focus-visible {
+  outline: 2px solid var(--gold);
+}
