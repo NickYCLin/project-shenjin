@@ -123,7 +123,9 @@ export function attack(state) {
     attackId: p.attackId,
     oath: state.oath,
     aspect: isAspect,
-    damage: (state.oath === "ember" ? 22 : 16) * (isAspect ? 1.75 : 1),
+    damage:
+      ((state.oath === "ember" ? 22 : 16) + 5 * ((state.level ?? 1) - 1)) *
+      (isAspect ? 1.75 : 1),
   };
   emit(state, "swing", p.x, p.z, {
     attackId: p.attackId,
@@ -280,7 +282,7 @@ function slam(state) {
     p.invulnerableTimer > 0
   )
     return;
-  const damage = b.attackPhase === 2 ? 32 : 24;
+  const damage = Math.round((b.attackPhase === 2 ? 32 : 24) * (b.harm ?? 1));
   p.hp = Math.max(0, p.hp - damage);
   p.invulnerableTimer = 0.75;
   emit(state, "hurt", p.x, p.z, { damage });
@@ -329,7 +331,13 @@ function stepBoss(state, dt) {
     slam(state);
     // A lethal strike keeps the final contact pose. Terminal states are not
     // stepped again, so this impact cannot repeat after defeat.
-    if (state.status === "playing") {
+    if (state.status === "playing" && b.doubleStrike && b.attackId % 2 === 1) {
+      b.state = "windup";
+      b.windupDuration = b.timer = 0.72;
+      b.targetX = p.x;
+      b.targetZ = p.z;
+      b.attackId++;
+    } else if (state.status === "playing") {
       b.state = "recover";
       b.timer = b.recoveryDuration;
     }

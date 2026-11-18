@@ -1,0 +1,146 @@
+/* Hallmark · custom · atmospheric · full-screen pilgrimage */
+:root {
+  --ink: #faf1d9;
+  --muted: #d1c2a8;
+  --gold: #f1ca82;
+  --line: #bea87975;
+  --shadow: #151c1c;
+  --clear: transparent;
+  --wash: linear-gradient(
+    90deg,
+    #101916fa 0%,
+    #17201ce8 27%,
+    #15201ab5 43%,
+    #1420200a 77%
+  );
+  --display: "Noto Serif CJK TC", "Songti TC", serif;
+}
+html,
+body {
+  overflow-x: clip;
+}
+#app,
+#world {
+  width: 100%;
+}
+#intro {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  color: var(--ink);
+  background:
+    var(--wash),
+    url("./images/pilgrimage.webp") 64% center/cover;
+  display: flex;
+  align-items: center;
+  padding: 80px clamp(24px, 7%, 140px) 44px;
+}
+body:not(.playing) .brand {
+  z-index: 1;
+  left: clamp(24px, 7%, 140px);
+}
+body:not(.playing) .utilities {
+  display: none;
+}
+.journey-sheet {
+  width: min(100%, 440px);
+}
+.journey-sheet h1 {
+  font: 500 clamp(40px, 5.4vw, 88px) / 1.25 var(--display);
+  margin: 0 0 12px;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+.journey-sheet p {
+  line-height: 1.65;
+  margin: 12px 0;
+  color: var(--muted);
+}
+#faiths {
+  border: 0;
+  padding: 0;
+  margin: 32px 0 0;
+}
+#faiths legend {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+#faiths button,
+#route button {
+  background: var(--clear);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 12px 16px;
+  margin-right: 8px;
+}
+#faiths button[aria-pressed="true"] {
+  background: var(--gold);
+  color: var(--shadow);
+}
+#route {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  margin-top: 24px;
+}
+#route button {
+  border: 0;
+  border-bottom: 2px solid var(--clear);
+  margin: 0;
+  padding: 8px 12px;
+}
+#route button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+#route button[aria-pressed="true"] {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+#gift-note,
+#load-status,
+#brief {
+  font-size: 14px;
+}
+#start {
+  max-width: 320px;
+  margin: 20px 0 8px;
+}
+#world {
+  touch-action: none;
+}
+@media (max-width: 680px) {
+  #intro {
+    align-items: flex-end;
+    background-position: 60% center;
+    padding-bottom: 6dvh;
+  }
+  .journey-sheet {
+    background: var(--shadow);
+    padding: 20px;
+  }
+  #faiths {
+    margin-top: 16px;
+  }
+  #route {
+    margin-top: 12px;
+  }
+  #route button {
+    padding: 8px 8px;
+  }
+}
+@media (max-height: 590px) {
+  #intro {
+    align-items: flex-start;
+    padding-top: 16px;
+  }
+  body:not(.playing) .brand {
+    display: none;
+  }
+}
+button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+button:active:not(:disabled) {
+  filter: brightness(0.92);
+}

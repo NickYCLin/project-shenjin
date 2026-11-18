@@ -15,13 +15,19 @@ import {
   attack,
   dodge,
   activateAspect,
-  switchOath,
   drainEvents,
 } from "./combat.js";
 import { FrameClock } from "./frame-clock.js";
 import { CameraCollision } from "./camera.js";
 import { CharacterAnimation } from "./character-animation.js";
-import "./style.css";
+import {
+  faiths,
+  route,
+  readJourney,
+  prepareEncounter,
+  invokeGift,
+} from "./pilgrimage.js";
+import { buildWaystation } from "./waystations.js";
 
 const $ = (id) => document.getElementById(id);
 const state = createGame();
@@ -52,6 +58,69 @@ let shake = 0,
 let motionOn = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const collisionObjects = [];
 
+const saveKey = "shenjin.pilgrimage.v1";
+let stored;
+try {
+  stored = localStorage.getItem(saveKey);
+} catch {}
+const journey = readJourney(stored);
+let station = Math.min(journey.cleared, route.length - 1);
+let storageAvailable = true;
+function saveJourney() {
+  try {
+    localStorage.setItem(saveKey, JSON.stringify(journey));
+  } catch {
+    storageAvailable = false;
+  }
+}
+function renderJourney() {
+  const selected = faiths[journey.faith];
+  $("gift-note").textContent = selected.gift + "　" + selected.detail;
+  $("story").textContent = journey.cleared
+    ? route[journey.cleared - 1].reward
+    : "河上的最後一艘渡船，還在等它的銅鈴。";
+  $("brief").textContent = route[station].brief;
+  $("faiths")
+    .querySelectorAll("button")
+    .forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.value === journey.faith)),
+    );
+  $("route")
+    .querySelectorAll("button")
+    .forEach((b, i) => {
+      b.disabled = i > journey.cleared;
+      b.setAttribute("aria-pressed", String(i === station));
+      b.textContent = route[i].place + (i < journey.cleared ? " ✓" : "");
+    });
+  if (loaded) {
+    $("start").textContent = "前往" + route[station].place;
+    $("load-status").textContent =
+      "行者等級 " +
+      (journey.cleared + 1) +
+      (storageAvailable ? "　進度儲存於此瀏覽器" : "　此瀏覽器無法保存進度");
+  }
+}
+for (const [id, faith] of Object.entries(faiths)) {
+  const b = document.createElement("button");
+  b.value = id;
+  b.textContent = faith.name;
+  b.onclick = () => {
+    journey.faith = id;
+    saveJourney();
+    renderJourney();
+  };
+  $("faiths").append(b);
+}
+route.forEach((stage, i) => {
+  const b = document.createElement("button");
+  b.onclick = () => {
+    station = i;
+    renderJourney();
+  };
+  $("route").append(b);
+});
+renderJourney();
+let destination = null;
 // Rendering is deliberately separate from the engine-free combat rules.
 let renderer;
 try {
@@ -73,6 +142,11 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.95;
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog("#b6c5c7", 45, 175);
+const stations = [buildWaystation(0), buildWaystation(1)];
+stations.forEach((group) => {
+  group.visible = false;
+  scene.add(group);
+});
 const camera = new THREE.PerspectiveCamera(
   52,
   innerWidth / innerHeight,
@@ -377,8 +451,7 @@ async function load() {
   guardian.position.set(state.boss.x, 0, state.boss.z);
   loaded = true;
   $("start").disabled = false;
-  $("start").textContent = "踏入失落神殿　→";
-  $("load-status").textContent = "場景已就緒 · 建議使用鍵盤與滑鼠";
+  renderJourney();
 }
 load().catch((error) => {
   console.error("Asset load failed", error);
@@ -421,6 +494,18 @@ function message(text) {
 }
 function begin() {
   if (!loaded) return;
+  prepareEncounter(state, journey, station);
+  environment.visible = station === 2;
+  stations.forEach((group, i) => (group.visible = i === station));
+  guardian.scale.setScalar([0.67, 0.83, 1][station]);
+  const stage = route[station];
+  $("enemy").textContent = stage.enemy;
+  $("task").textContent = "擊敗" + stage.enemy;
+  $("region").textContent = stage.place;
+  $("region").parentElement.hidden = false;
+  $("oath").querySelector("span").textContent = faiths[journey.faith].gift;
+  destination = null;
+  lastStatus = "ready";
   start(state);
   paused = false;
   frameClock.reset();
@@ -433,10 +518,10 @@ function begin() {
   $("pause-panel").hidden = true;
   $("pause").textContent = "暫停";
   cameraYaw = 0;
-  cameraPitch = -0.06;
+  cameraPitch = 0.55;
   keys.clear();
   canvas.focus({ preventScroll: true });
-  message("第一誓 · 神殿試煉");
+  message(stage.brief);
 }
 function again() {
   restart(state);
@@ -451,6 +536,22 @@ function again() {
   });
   effects.length = 0;
   begin();
+}
+function returnToRoute() {
+  if (state.status === "won")
+    station = Math.min(journey.cleared, route.length - 1);
+  restart(state);
+  paused = false;
+  destination = null;
+  keys.clear();
+  frameClock.reset();
+  document.body.classList.remove("playing");
+  for (const id of ["pause", "hud", "result", "pause-panel"])
+    $(id).hidden = true;
+  $("region").parentElement.hidden = true;
+  $("intro").hidden = false;
+  renderJourney();
+  $("start").focus();
 }
 function setPause(value) {
   if (!["playing"].includes(state.status)) return;
@@ -470,6 +571,14 @@ function moveInput() {
   const sz =
     Number(keys.has("KeyS") || keys.has("ArrowDown")) -
     Number(keys.has("KeyW") || keys.has("ArrowUp"));
+  if (sx || sz) destination = null;
+  if (destination) {
+    const dx = destination.x - state.player.x,
+      dz = destination.z - state.player.z;
+    const length = Math.hypot(dx, dz);
+    if (length > 0.2) return { x: dx / length, z: dz / length };
+    destination = null;
+  }
   return {
     x: sx * Math.cos(cameraYaw) + sz * Math.sin(cameraYaw),
     z: -sx * Math.sin(cameraYaw) + sz * Math.cos(cameraYaw),
@@ -492,12 +601,20 @@ function action(type) {
     const direction = moveInput();
     dodge(state, direction.x, direction.z);
   } else if (type === "aspect") activateAspect(state);
-  else if (switchOath(state))
-    message(state.oath === "ember" ? "燼誓 · 破陣" : "潮誓 · 生息");
+  else if (invokeGift(state)) {
+    message(faiths[state.faith].gift);
+    burst(state.player.x, state.player.z, "#eec97e", 1.8);
+  } else if (
+    type === "oath" &&
+    state.faith === "pyre" &&
+    state.player.oathCooldown <= 0
+  )
+    message("神相尚有能量，請先降神");
   canvas.focus({ preventScroll: true });
 }
-$("start").addEventListener("click", begin);
-$("restart").addEventListener("click", again);
+$("start").addEventListener("click", again);
+$("restart").addEventListener("click", returnToRoute);
+$("retreat").addEventListener("click", returnToRoute);
 $("restart-pause").addEventListener("click", again);
 $("pause").addEventListener("click", () => setPause(!paused));
 $("resume").addEventListener("click", () => setPause(false));
@@ -557,7 +674,39 @@ document.addEventListener("visibilitychange", () => {
 canvas.addEventListener("contextmenu", (event) => event.preventDefault());
 canvas.addEventListener("pointerdown", (event) => {
   canvas.focus({ preventScroll: true });
-  if (event.button === 0) action("attack");
+  if (event.button === 0 && state.status === "playing" && !paused) {
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(
+      new THREE.Vector2(
+        (event.clientX / innerWidth) * 2 - 1,
+        1 - (event.clientY / innerHeight) * 2,
+      ),
+      camera,
+    );
+    const hit = new THREE.Vector3();
+    if (ray.intersectObject(guardian, true).length) {
+      if (
+        Math.hypot(
+          state.player.x - state.boss.x,
+          state.player.z - state.boss.z,
+        ) < 3.7
+      ) {
+        destination = null;
+        action("attack");
+      } else destination = { x: state.boss.x, z: state.boss.z };
+    } else if (
+      ray.ray.intersectPlane(
+        new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
+        hit,
+      )
+    ) {
+      const reach = Math.min(
+        1,
+        (RULES.arenaRadius - 0.6) / Math.max(0.01, Math.hypot(hit.x, hit.z)),
+      );
+      destination = { x: hit.x * reach, z: hit.z * reach };
+    }
+  }
   if (event.button === 2) {
     drag = true;
     canvas.setPointerCapture(event.pointerId);
@@ -679,8 +828,9 @@ function processEvents() {
   }
 }
 function updateHUD() {
-  $("hp-text").textContent = `${Math.ceil(state.player.hp)} / 100`;
-  $("hp-bar").style.width = `${state.player.hp}%`;
+  $("hp-text").textContent =
+    `${Math.ceil(state.player.hp)} / ${state.player.maxHp}`;
+  $("hp-bar").style.width = `${(100 * state.player.hp) / state.player.maxHp}%`;
   $("stamina-bar").style.width = `${state.player.stamina}%`;
   $("aspect-bar").style.width = `${state.player.aspect}%`;
   $("aspect-text").textContent =
@@ -688,30 +838,43 @@ function updateHUD() {
       ? "降臨中"
       : `${Math.floor(state.player.aspect)}%`;
   $("boss-bar").style.width = `${(state.boss.hp / state.boss.maxHp) * 100}%`;
-  $("boss-phase").textContent =
-    state.boss.phase === 2 ? "神殿鎮守 · 第二相" : "神殿鎮守 · 第一相";
+  $("boss-phase").textContent = state.boss.phase === 2 ? "狂怒" : "戒備";
   $("boss-action").textContent =
     {
       idle: "靠近守衛，尋找破綻",
       chase: "守衛正在逼近",
-      windup: "重擊將至 · 離開紅色圓陣",
+      windup:
+        state.boss.doubleStrike && state.boss.attackId % 2 === 0
+          ? "石將連擊，繼續移動"
+          : "重擊將至，離開紅色圓陣",
       slam: "重擊",
       recover: "破綻出現 · 反擊傷害 +25%",
       dead: "試煉完成",
     }[state.boss.state] ?? "";
   $("oath-name").textContent =
-    state.oath === "ember" ? "燼誓 · 破陣" : "潮誓 · 生息";
+    faiths[journey.faith].name + "行者　等級 " + (state.level ?? 1);
+  $("oath").querySelector("kbd").textContent =
+    state.player.oathCooldown > 0
+      ? Math.ceil(state.player.oathCooldown) + " 秒"
+      : "E";
   $("aspect").classList.toggle("active", state.player.aspectTimer > 0);
   if (lastStatus !== state.status && ["won", "lost"].includes(state.status)) {
     const won = state.status === "won";
     keys.clear();
-    $("result-kicker").textContent = won
-      ? "OATH FULFILLED"
-      : "THE OATH REMAINS";
-    $("result-title").textContent = won ? "誓衛已沉眠" : "餘燼，尚未熄滅";
+    const advanced = won && journey.cleared === station;
+    if (advanced) {
+      journey.cleared++;
+      saveJourney();
+    }
+    $("result-title").textContent = won
+      ? station === 2
+        ? "聖火重燃"
+        : "古道已通"
+      : "行旅受阻";
     $("result-copy").textContent = won
-      ? `你用了 ${Math.round(state.time)} 秒完成試煉。換一種神誓，再試一次不同的節奏。`
-      : "重擊前會出現紅色圓陣。向外閃避，等守衛收招時再進攻。";
+      ? route[station].reward + (advanced ? " 行者升級，生命與槍術提升。" : "")
+      : "避開地上的朱紅印記，等敵人收招時出槍。";
+
     $("result").hidden = false;
     $("pause").hidden = true;
     $("restart").focus();
@@ -779,6 +942,7 @@ function frame(stamp) {
     hurtFlash = Math.max(0, hurtFlash - realDelta);
     shake = Math.max(0, shake - realDelta * 0.8);
   }
+  if (!document.body.classList.contains("playing")) return;
   if (loaded) {
     processEvents();
     if (!paused && state.status === "playing") {
@@ -801,6 +965,11 @@ function frame(stamp) {
     targetRing.visible = targetFill.visible =
       ["windup", "slam"].includes(state.boss.state) &&
       state.status === "playing";
+    targetRing.scale.setScalar(
+      (state.boss.slamRadius + RULES.playerRadius) /
+        (RULES.slamRadius + RULES.playerRadius),
+    );
+    targetFill.scale.copy(targetRing.scale);
     targetRing.position.set(state.boss.targetX, 0.065, state.boss.targetZ);
     targetFill.position.set(state.boss.targetX, 0.055, state.boss.targetZ);
     targetRing.material.opacity = 0.7 + Math.sin(visualTime * 18) * 0.2;
@@ -810,7 +979,7 @@ function frame(stamp) {
       lookAt.set(1, 4, -8);
       camera.position.lerp(targetCamera, 1 - Math.exp(-realDelta * 3));
     } else {
-      const distance = 5;
+      const distance = 7.5;
       lookAt.set(
         state.player.x + Math.cos(cameraYaw) * 0.65,
         2,
@@ -827,7 +996,7 @@ function frame(stamp) {
       cameraCollision.resolve(
         lookAt,
         smoothedCamera,
-        collisionObjects,
+        environment.visible ? collisionObjects : [],
         camera.position,
       );
     }
